@@ -10,8 +10,17 @@
 		</h1>
 	<script>
 		document.addEventListener('DOMContentLoaded',function(){
-			var endpoint = 'ws://localhost:8000/ws/';
-			
+			var loc = window.location
+			var wsStart ='ws://'
+
+
+			if(loc.protocol =='https:'){
+				wsStart ='wss://'
+			}
+
+
+			var endpoint = wsStart+loc.host+loc.pathname+'ws/'
+
 			var socket = new WebSocket(endpoint);
 
 			socket.onmessage = function(e){
