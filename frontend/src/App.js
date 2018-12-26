@@ -5,15 +5,15 @@ import './App.css';
 class App extends Component {
 	componentDidMount(){
 			var loc = window.location
-			var wsStart ='ws://'
+			var wsStart ="ws://"
 
 
-			if(loc.protocol =='https:'){
-				wsStart ='wss://'
+			if(loc.protocol === "https:"){
+				wsStart ="wss://"
 			}
 
 
-			var endpoint = wsStart+loc.host+loc.pathname+'ws/'
+			var endpoint = wsStart+loc.host+loc.pathname+"ws/"
 
 			var socket = new WebSocket(endpoint);
 
