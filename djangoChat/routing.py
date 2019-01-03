@@ -4,7 +4,7 @@ from chat.consumers import EchoConsumer
 
 application = ProtocolTypeRouter({
     'websocket': URLRouter([
-        path("ws/",EchoConsumer)
+        path("main/ws/",EchoConsumer)
        ])
 
 

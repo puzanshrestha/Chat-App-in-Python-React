@@ -1,5 +1,6 @@
 import React, {Component, Fragment} from "react";
 import {Grid, Paper, TextField, Typography, Button} from "@material-ui/core"
+import {Link} from "react-router-dom";
 
 class Login extends Component {
 
@@ -46,11 +47,17 @@ class Login extends Component {
                         alignItems: 'flex-end',
                         alignContent: 'flex-end',
                         flex: 1
-                    }}><div style={{ flex: 1 }}/>
-                        <Button variant="contained" size="large" color="primary"
-                                style={{marginTop: 20, alignSelf: 'flex-end'}}>
-                            Login
-                        </Button>
+                    }}>
+                        <div style={{flex: 1}}/>
+                        <Link to="/main">
+                            <Button
+                                variant="contained"
+                                size="large" color="primary"
+                                style={{marginTop: 20, alignSelf: 'flex-end'}}
+                            >
+                                Login
+                            </Button>
+                        </Link>
                     </Grid>
                 </Paper>
 
