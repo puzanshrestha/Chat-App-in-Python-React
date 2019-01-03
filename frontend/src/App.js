@@ -22,7 +22,8 @@ class App extends Component {
 
         this.state = {
             chatMessages: [],
-            message: ''
+            message: '',
+            username: 'user1'
         }
         this.socket = new Object()
         this.setUpConnection();
@@ -96,7 +97,12 @@ class App extends Component {
             var messages = []
 
             this.state.chatMessages.map(key => {
-                messages.push(<Typography> {key} </Typography>);
+                // for (var i = 0; i < 200; i++)
+                messages.push(
+                    <div style={{borderRadius:5,padding:5}}>
+                        <Typography>{this.state.username}: {key} </Typography>
+                        <div style={{marginBottom: 5}}></div>
+                    </div>);
             })
 
             return messages;
@@ -108,7 +114,7 @@ class App extends Component {
                 <AppBar position="static">
                     <Toolbar>
                         <Typography variant="h6" color="inherit">
-                            Django Channel based Chat
+                            Django Channel Example
                         </Typography>
 
                     </Toolbar>
@@ -116,7 +122,7 @@ class App extends Component {
 
                 <Grid container>
                     <Grid sm={3}>
-                        <Paper style={Styles.Paper}>
+                        <Paper style={Styles.leftPane}>
                             <List component="ul">
                                 {this.populateLeftPanel()}
 
@@ -125,33 +131,41 @@ class App extends Component {
                     </Grid>
 
                     <Grid sm={9} direction={"column"}>
-                        <Paper style={Styles.Paper}>
-                            <PopulateMessages/>
-                        </Paper>
-                        <Grid>
-                            <TextField
-                                id="outlined-username-input"
-                                label="Type your message here"
-                                autoComplete="current-password"
-                                margin="normal"
-                                variant="outlined"
-                                onChange={event => {
-                                    this.setState({
-                                        message: event.target.value
-                                    })
-                                }
-                                }
-                            />
-                            <Button variant="contained" size="large" color="primary"
-                                    style={{marginTop: 20, alignSelf: 'flex-end'}}
-                                    onClick={() => {
-                                        this.sendMessage()
-                                    }}
-                            >
-                                Send
-                            </Button>
+                        <Paper style={Styles.rightPane}>
+                            <Grid style={{display: 'flex', flex: 1, flexDirection: 'column', overflowY: 'auto',padding:10}}>
+                                <PopulateMessages/>
+                            </Grid>
 
-                        </Grid>
+                            <Grid style={{display: 'flex'}}>
+                                <TextField
+                                    id="outlined-with-placeholder"
+                                    placeholder="Type your message here"
+                                    margin="normal"
+                                    variant="outlined"
+                                    onChange={event => {
+                                        this.setState({
+                                            message: event.target.value
+                                        })
+                                    }
+                                    }
+                                    style={{flex: 1}}
+
+                                />
+                                <div style={{display: 'flex', alignItems: 'center'}}>
+
+                                    <Button variant="contained"
+                                            size="large"
+                                            color="primary"
+                                            onClick={() => {
+                                                this.sendMessage()
+                                            }}
+                                    >
+                                        Send
+                                    </Button>
+                                </div>
+
+                            </Grid>
+                        </Paper>
                     </Grid>
                 </Grid>
 
@@ -166,11 +180,22 @@ class App extends Component {
 
 const
     Styles = {
-        Paper: {
+        leftPane: {
             marginTop: 5,
             padding: 10,
             height: 500,
-            overflowY: 'auto'
+            overflowY: 'auto',
+
+
+        },
+        rightPane: {
+            marginTop: 5,
+            padding: 10,
+            height: 500,
+            display: 'flex',
+            flex: 1,
+            flexDirection: 'column'
+
         },
 
     };
