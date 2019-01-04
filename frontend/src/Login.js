@@ -1,9 +1,17 @@
 import React, {Component, Fragment} from "react";
 import {Grid, Paper, TextField, Typography, Button} from "@material-ui/core"
 import {Link} from "react-router-dom";
+import {connect} from "react-redux";
+import {loginTest} from "./Redux/Actions/LoginAction";
 
 class Login extends Component {
-
+    constructor(props) {
+        super(props)
+        this.state = {
+            username: '',
+            password: ''
+        }
+    }
 
     render() {
         return (
@@ -28,6 +36,11 @@ class Login extends Component {
                                 autoComplete="current-password"
                                 margin="normal"
                                 variant="outlined"
+                                onChange={(event) => {
+                                    this.setState({
+                                        username: event.target.value
+                                    })
+                                }}
                             />
                         </Grid>
 
@@ -39,14 +52,20 @@ class Login extends Component {
                                 autoComplete="current-password"
                                 margin="normal"
                                 variant="outlined"
+                                onChange={(event) => {
+                                    this.setState({
+                                        password: event.target.value
+                                    })
+                                }}
                             />
                         </Grid>
                     </Grid>
-                    <Grid direction="row" style={{
+                    <Grid style={{
                         justifyContent: 'flex-end',
                         alignItems: 'flex-end',
                         alignContent: 'flex-end',
-                        flex: 1
+                        flex: 1,
+                        flexDirection: "row"
                     }}>
                         <div style={{flex: 1}}/>
                         <Link to="/main">
@@ -54,22 +73,37 @@ class Login extends Component {
                                 variant="contained"
                                 size="large" color="primary"
                                 style={{marginTop: 20, alignSelf: 'flex-end'}}
+                                onClick={() => this.onLoginButtonPressed()}
                             >
                                 Login
                             </Button>
                         </Link>
                     </Grid>
                 </Paper>
-
             </Grid>
 
-
         )
-
     }
 
+    onLoginButtonPressed() {
+        this.props.loginTest(this.state.username, this.state.password)
+    }
 };
-export default Login;
+
+const mapStateToProps = state => {
+    return {}
+};
+const mapDispatchToProps = dispatch => {
+    return {
+        loginTest: (username, password) => dispatch(loginTest(username, password)),
+
+    };
+};
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Login);
+
 
 
 

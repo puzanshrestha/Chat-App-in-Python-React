@@ -12,6 +12,8 @@ import {
     ListItem,
     ListItemText
 } from '@material-ui/core';
+import {connect} from "react-redux";
+import {loginTest} from "./Redux/Actions/LoginAction";
 
 
 class Main extends Component {
@@ -22,7 +24,7 @@ class Main extends Component {
         this.state = {
             chatMessages: [],
             message: '',
-            username: 'user1'
+            username: this.props.username
         }
         this.socket = {}
         this.setUpConnection();
@@ -99,7 +101,7 @@ class Main extends Component {
                 // for (var i = 0; i < 200; i++)
                 messages.push(
                     <Paper style={{borderRadius: 5, backgroundColor: 'red', padding: 5, marginBottom: 4}}>
-                        <Typography style={{color:'white'}}>{this.state.username}: {key} </Typography>
+                        <Typography style={{color: 'white'}}>{key} </Typography>
                         <div style={{marginBottom: 5}}></div>
                     </Paper>);
             })
@@ -119,8 +121,8 @@ class Main extends Component {
                     </Toolbar>
                 </AppBar>
 
-                <Grid container>
-                    <Grid sm={3}>
+                <Grid container style={{flex: 1, display: 'flex'}}>
+                    <Grid style={{display: 'flex', flex: 0.3}}>
                         <Paper style={Styles.leftPane}>
                             <List component="ul">
                                 {this.populateLeftPanel()}
@@ -129,7 +131,7 @@ class Main extends Component {
                         </Paper>
                     </Grid>
 
-                    <Grid sm={9} direction={"column"}>
+                    <Grid style={{display: 'flex', flex: 0.7}}>
                         <Paper style={Styles.rightPane}>
                             <Grid style={{
                                 display: 'flex',
@@ -187,8 +189,10 @@ class Main extends Component {
     }
 
     sendMessage() {
-        this.socket.send(this.state.message)
-        this.setState({message: ''})
+        this.socket.send(this.state.username + ":" + this.state.message)
+        this.setState({
+            message: ''
+        })
     }
 }
 
@@ -198,6 +202,8 @@ const
             marginTop: 5,
             padding: 10,
             height: 500,
+            display: 'flex',
+            flex: 1,
             overflowY: 'auto',
 
 
@@ -214,4 +220,18 @@ const
 
     };
 
-export default Main;
+const mapStateToProps = state => {
+    return {
+        username: state.login.username
+    }
+};
+const mapDispatchToProps = dispatch => {
+    return {
+        loginTest: (username, password) => dispatch(loginTest(username, password)),
+
+    };
+};
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Main);
