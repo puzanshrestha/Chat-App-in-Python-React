@@ -10,15 +10,23 @@ class EchoConsumer(AsyncConsumer):
         await self.channel_layer.group_add("group",self.channel_name)
 
     async def websocket_receive(self,event):
+        clientRequest = json.loads(event["text"])
 
-        newevent ={
-                "type":"chat_message",
-                "text":event['text']
-                }
-        
-        #await self.send(newevent)
+        clientResponse=dict()
+#        clientResponse['message']=clientRequest['message']
+#        clientResponse['actionType']='message'
+#        clientResponse['sender']=clientRequest['sender']
+#        clientResponse['messageType']=clientRequest['re']
 
-        await self.channel_layer.group_send("group",newevent)
+        if(clientRequest['actionType']=='message'):
+            newevent ={
+                    "type":"chat_message",
+                    "text":json.dumps(clientRequest)
+                    }
+
+            #await self.send(newevent)
+
+            await self.channel_layer.group_send("group",newevent)
 
     async def chat_message(self,event):
         await self.send({

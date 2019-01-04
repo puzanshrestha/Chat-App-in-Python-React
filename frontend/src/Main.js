@@ -33,7 +33,8 @@ class Main extends Component {
 
     onMessageReceived(data) {
         var array = this.state.chatMessages;
-        array.push(data);
+        let response = JSON.parse(data)
+        array.push({'sender': response.sender, 'message': response.message});
         this.setState({
             chatMessages: array
         })
@@ -97,13 +98,32 @@ class Main extends Component {
         const PopulateMessages = () => {
             var messages = []
 
+
             this.state.chatMessages.map(key => {
-                // for (var i = 0; i < 200; i++)
+                // for (var i = 0; i < 20; i++) {
+                var selfSender = this.state.username == key.sender
                 messages.push(
-                    <Paper style={{borderRadius: 5, backgroundColor: 'red', padding: 5, marginBottom: 4}}>
-                        <Typography style={{color: 'white'}}>{key} </Typography>
+                    <div style={{
+                        display: 'flex',
+                        borderRadius: 5,
+                        padding: 5,
+                        marginBottom: 4,
+                        justifyContent: selfSender ? 'flex-end' : 'flex-start'
+
+                    }}>
+                        <Paper style={{
+                            backgroundColor: selfSender ? '#E5E5EA' : '#52C2F9',
+                            padding: 10,
+                            borderRadius: 15
+                        }}>
+                            <Typography style={{
+                                color: selfSender ? 'black' : 'white',
+                            }}>{key.message}</Typography>
+                        </Paper>
                         <div style={{marginBottom: 5}}></div>
-                    </Paper>);
+                    </div>
+                );
+
             })
 
             return messages;
@@ -138,7 +158,8 @@ class Main extends Component {
                                 flex: 1,
                                 flexDirection: 'column',
                                 overflowY: 'auto',
-                                padding: 10
+                                padding: 10,
+                                flexDirection: 'column'
                             }}>
                                 <PopulateMessages/>
                             </Grid>
@@ -189,7 +210,13 @@ class Main extends Component {
     }
 
     sendMessage() {
-        this.socket.send(this.state.username + ":" + this.state.message)
+        var clientRequest = {
+            actionType: "message",
+            sender: this.state.username,
+            message: this.state.message,
+
+        }
+        this.socket.send(JSON.stringify(clientRequest))
         this.setState({
             message: ''
         })
