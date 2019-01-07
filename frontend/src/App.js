@@ -19,7 +19,6 @@ export default class App extends Component {
                         <Route path={"/"} exact component={Login}/>
                         <Route path={"/main"} component={Main}/>
                         <Route component={Error}/>
-
                     </Switch>
                 </BrowserRouter>
             </Provider>

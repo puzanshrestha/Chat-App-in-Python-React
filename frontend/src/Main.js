@@ -10,11 +10,17 @@ import {
     Paper,
     List,
     ListItem,
-    ListItemText
+    ListItemText,
+    Menu,
+    MenuItem, ListItemIcon,
+    Tabs, Tab
 } from '@material-ui/core';
 import {connect} from "react-redux";
-import {loginTest} from "./Redux/Actions/LoginAction";
 
+import axios from 'axios';
+import AccountCircle from '@material-ui/icons/AccountCircle';
+import MoreVert from '@material-ui/icons/MoreVert';
+import IconButton from '@material-ui/core/IconButton'
 
 class Main extends Component {
 
@@ -22,17 +28,64 @@ class Main extends Component {
         super(props);
 
         this.state = {
+            anchorProfileMenu: null,
+            anchorChatUserMenu: null,
             chatMessages: [],
             message: '',
-            username: this.props.username
+            username: this.props.username,
+            userList: [],
+            tabIndex: 0
         }
         this.socket = {}
         this.setUpConnection();
+        this.updateUserList()
+
+    }
+
+    updateUserList() {
+        let self = this
+        axios.get('http://localhost:8000/get_user_list')
+            .then(function (response) {
+                // handle success (Try)
+                self.setState({
+                    userList: response.data.userList
+                })
+            })
+            .catch(function (error) {
+                // handle error (Catch)
+                console.log(error);
+            })
+            .then(function () {
+                // always executed (Finally)
+            });
+
 
     }
 
     onMessageReceived(data) {
-        var array = this.state.chatMessages;
+        try {
+            let action = (JSON.parse(data)).actionType;
+            console.log(action)
+            switch (action) {
+                case 'message':
+                    this.populateMessage(data);
+                    break
+
+                case 'updateUserList':
+                    this.updateUserList();
+
+                default:
+                    break;
+            }
+        }
+        catch (Exception) {
+
+        }
+
+    }
+
+    populateMessage(data) {
+        let array = this.state.chatMessages;
         let response = JSON.parse(data)
         array.push({'sender': response.sender, 'message': response.message});
         this.setState({
@@ -84,21 +137,79 @@ class Main extends Component {
 
     populateLeftPanel() {
         var listItems = [];
-        for (var i = 0; i < 20; i++) {
+        this.state.userList.map((data) => {
             listItems.push(
-                <ListItem button>
-                    <ListItemText primary={"Trash" + i}/>
+                <ListItem style={{display: 'flex', flex: 1, flexDirection: 'vertical'}}>
+                    <Button style={{display: 'flex', flex: 1, justifyContent: 'flex-start', textTransform: 'none'}}>
+                        <ListItemText
+                            primary={data.username} style={{display: 'flex', flex: 1, justifyContent: 'flex-start'}}/>
+                    </Button>
+
+                    <Button
+                        onClick={(event) => {
+                            this.chatUserMenuOpenHandler(event)
+
+                        }}
+                        style={{display: 'flex', justifyContent: 'flex-end'}}>
+                        <ListItemIcon>
+                            <MoreVert/>
+                        </ListItemIcon>
+
+                    </Button>
+
                 </ListItem>
             )
-        }
+        })
         return listItems
+    }
+
+    profileMenuHandleClose() {
+        this.setState({
+            anchorProfileMenu: null
+        });
+
+    }
+
+    profileMenuHandleOpen(event) {
+        this.setState({
+            anchorProfileMenu: event.currentTarget
+        });
+    }
+
+    chatUserMenuOpenHandler(event) {
+        this.setState({
+            anchorChatUserMenu: event.currentTarget
+        })
+
+    }
+
+    chatUserMenuCloseHandler() {
+        this.setState({
+            anchorChatUserMenu: null
+        })
+    }
+
+    onProfileClicked() {
+        //TODO Redirect to User Profile
+    }
+
+    onLogOutClicked() {
+        let data = {
+            actionType: "logout",
+            username: this.state.username
+        }
+        this.socketSend(JSON.stringify(data))
+
+        this.props.history.push('/')
+    }
+
+    socketSend(data) {
+        this.socket.send(data)
     }
 
     render() {
         const PopulateMessages = () => {
             var messages = []
-
-
             this.state.chatMessages.map(key => {
                 // for (var i = 0; i < 20; i++) {
                 var selfSender = this.state.username == key.sender
@@ -129,22 +240,79 @@ class Main extends Component {
             return messages;
 
         }
+        const renderProfileMenu = (
+            <Menu
+                anchorEl={this.state.anchorProfileMenu}
+                anchorOrigin={{vertical: 'top', horizontal: 'right'}}
+                transformOrigin={{vertical: 'top', horizontal: 'right'}}
+                open={Boolean(this.state.anchorProfileMenu)}
+                onClose={() => {
+                    this.profileMenuHandleClose()
+                }}
+            >
+                <MenuItem onClick={() => {
+                    this.onProfileClicked();
+                    this.profileMenuHandleClose()
+                }}>Profile</MenuItem>
+                <MenuItem onClick={() => {
+                    this.onLogOutClicked();
+                    this.profileMenuHandleClose()
+                }}>Log Out</MenuItem>
+            </Menu>
+        )
 
+        const renderChatUserMenu = (
+            <Menu
+                anchorEl={this.state.anchorChatUserMenu}
+                anchorOrigin={{vertical: 'top', horizontal: 'left'}}
+                transformOrigin={{vertical: 'top', horizontal: 'left'}}
+                open={Boolean(this.state.anchorChatUserMenu)}
+                onClose={() => {
+                    this.chatUserMenuCloseHandler()
+                }}
+            >
+                <MenuItem onClick={() => {
+                    this.onProfileClicked();
+                    this.profileMenuHandleClose()
+                }}>View Profile</MenuItem>
+                <MenuItem onClick={() => {
+                    this.onLogOutClicked();
+                    this.profileMenuHandleClose()
+                }}>Kick User</MenuItem>
+
+                <MenuItem onClick={() => {
+                    this.onLogOutClicked();
+                    this.profileMenuHandleClose()
+                }}>Send Message</MenuItem>
+            </Menu>
+        )
         return (
             <Fragment>
                 <AppBar position="static">
-                    <Toolbar>
-                        <Typography variant="h6" color="inherit">
+                    <Toolbar style={{display: 'flex'}}>
+                        <Typography variant="h6" color="inherit" style={{flex: 1}}>
                             Django Channel Example
                         </Typography>
+                        <IconButton
+                            aria-owns={'material-appbar'}
+                            aria-haspopup="true"
+                            onClick={(event) => {
+                                this.profileMenuHandleOpen(event)
 
+                            }}
+                            color="inherit"
+                        >
+                            <AccountCircle/>
+                        </IconButton>
                     </Toolbar>
+                    {renderProfileMenu}
+                    {renderChatUserMenu}
                 </AppBar>
 
                 <Grid container style={{flex: 1, display: 'flex'}}>
-                    <Grid style={{display: 'flex', flex: 0.3}}>
+                    <Grid style={{display: 'flex', flex: 0.2}}>
                         <Paper style={Styles.leftPane}>
-                            <List component="ul">
+                            <List component="ul" style={{flex: 1}}>
                                 {this.populateLeftPanel()}
 
                             </List>
@@ -204,6 +372,33 @@ class Main extends Component {
                         </Paper>
                     </Grid>
                 </Grid>
+                <Tabs
+                    value={this.state.tabIndex}
+
+                >
+                    <Tab
+                        disableRipple
+                        label="Tab 1"
+                        onClick={() => {
+                            this.setState({tabIndex: 0})
+                        }}
+
+                    />
+                    <Tab
+                        disableRipple
+                        label="Tab 2"
+                        onClick={() => {
+                            this.setState({tabIndex: 1})
+                        }}
+                    />
+                    <Tab
+                        disableRipple
+                        label="Tab 3"
+                        onClick={() => {
+                            this.setState({tabIndex: 2})
+                        }}
+                    />
+                </Tabs>
 
             </Fragment>
         )
@@ -253,10 +448,7 @@ const mapStateToProps = state => {
     }
 };
 const mapDispatchToProps = dispatch => {
-    return {
-        loginTest: (username, password) => dispatch(loginTest(username, password)),
-
-    };
+    return {};
 };
 export default connect(
     mapStateToProps,

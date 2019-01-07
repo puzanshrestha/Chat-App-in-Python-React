@@ -1,6 +1,6 @@
 import {
-    LOGIN,
-} from "../Actions/LoginAction";
+    LOGIN,LOGOUT
+} from "../Actions/LoginActionType";
 
 const initialState = {
     username: ''
@@ -11,6 +11,12 @@ export default function reducer(state = initialState, action) {
         case LOGIN:
             return Object.assign({}, state, {
                 username: action.username
+            });
+            break;
+
+        case LOGOUT:
+            return Object.assign({}, state, {
+                username: ''
             });
             break;
 

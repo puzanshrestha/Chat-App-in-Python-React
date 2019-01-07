@@ -2,7 +2,7 @@ import React, {Component, Fragment} from "react";
 import {Grid, Paper, TextField, Typography, Button} from "@material-ui/core"
 import {Link} from "react-router-dom";
 import {connect} from "react-redux";
-import {loginTest} from "./Redux/Actions/LoginAction";
+import {login} from "./Redux/Actions/LoginAction";
 
 class Login extends Component {
     constructor(props) {
@@ -86,7 +86,7 @@ class Login extends Component {
     }
 
     onLoginButtonPressed() {
-        this.props.loginTest(this.state.username, this.state.password)
+        this.props.login(this.state.username, this.state.password)
     }
 };
 
@@ -95,7 +95,7 @@ const mapStateToProps = state => {
 };
 const mapDispatchToProps = dispatch => {
     return {
-        loginTest: (username, password) => dispatch(loginTest(username, password)),
+        login: (username, password) => dispatch(login(username, password)),
 
     };
 };
