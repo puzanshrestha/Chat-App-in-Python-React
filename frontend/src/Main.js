@@ -21,6 +21,7 @@ import axios from 'axios';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MoreVert from '@material-ui/icons/MoreVert';
 import IconButton from '@material-ui/core/IconButton'
+import {BASE_URL} from "./Redux/Constants";
 
 class Main extends Component {
 
@@ -44,7 +45,7 @@ class Main extends Component {
 
     updateUserList() {
         let self = this
-        axios.get('http://localhost:8000/get_user_list')
+        axios.get(BASE_URL + '/get_user_list')
             .then(function (response) {
                 // handle success (Try)
                 self.setState({
