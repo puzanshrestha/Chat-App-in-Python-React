@@ -1,5 +1,6 @@
 import {loginAction, logOutAction} from './LoginActionType'
 import axios from 'axios';
+import {BASE_URL} from '../Constants'
 
 
 export function login(username, password) {
@@ -24,7 +25,7 @@ function handleLogin(username, password) {
 
     axios({
         method: 'POST',
-        url: 'http://localhost:8000/login',
+        url: BASE_URL + '/login',
         data: body
     }).then(function (response) {
         console.log(response)
@@ -42,7 +43,7 @@ function handleLogOut(username) {
     }
     axios({
         method: 'POST',
-        url: 'http://localhost:8000/logout',
+        url: BASE_URL + '/logout',
         data: body
     }).then(function (response) {
         console.log(response)
