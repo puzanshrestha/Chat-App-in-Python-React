@@ -1,10 +1,11 @@
 import React, {Component} from 'react';
 
 import {BrowserRouter, Route, Switch, Link} from "react-router-dom";
-import { Provider } from 'react-redux'
+import {Provider} from 'react-redux'
 import store from './Redux/Store'
 import Login from './Login'
 import Main from './Main'
+import Home from './Home'
 
 export default class App extends Component {
 
@@ -18,6 +19,7 @@ export default class App extends Component {
                     <Switch>
                         <Route path={"/"} exact component={Login}/>
                         <Route path={"/main"} component={Main}/>
+                        <Route path={"/home"} component={Home}/>
                         <Route component={Error}/>
                     </Switch>
                 </BrowserRouter>

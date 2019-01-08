@@ -6,7 +6,7 @@ import {BASE_URL} from '../Constants'
 export function login(username, password) {
     handleLogin(username, password);
     return dispatch => {
-        dispatch(loginAction(username));
+        dispatch(loginAction(username,password));
     };
 }
 

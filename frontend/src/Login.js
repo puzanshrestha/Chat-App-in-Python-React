@@ -1,4 +1,4 @@
-import React, {Component, Fragment} from "react";
+import React, {Component} from "react";
 import {Grid, Paper, TextField, Typography, Button} from "@material-ui/core"
 import {Link} from "react-router-dom";
 import {connect} from "react-redux";
@@ -68,7 +68,7 @@ class Login extends Component {
                         flexDirection: "row"
                     }}>
                         <div style={{flex: 1}}/>
-                        <Link to="/main">
+                        <Link to="/home">
                             <Button
                                 variant="contained"
                                 size="large" color="primary"

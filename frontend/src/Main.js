@@ -1,8 +1,5 @@
 import React, {Component, Fragment} from 'react';
-
 import {
-    AppBar,
-    Toolbar,
     Typography,
     Grid,
     TextField,
@@ -13,27 +10,26 @@ import {
     ListItemText,
     Menu,
     MenuItem, ListItemIcon,
-    Tabs, Tab
 } from '@material-ui/core';
 import {connect} from "react-redux";
-
 import axios from 'axios';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import MoreVert from '@material-ui/icons/MoreVert';
-import IconButton from '@material-ui/core/IconButton'
+
 import {BASE_URL} from "./Redux/Constants";
+import Navigation from "./Navigation"
+import MoreVert from '@material-ui/icons/MoreVert';
+import ChatNavigation from './ChatNavigation'
 
 class Main extends Component {
 
     constructor(props) {
         super(props);
-
         this.state = {
             anchorProfileMenu: null,
             anchorChatUserMenu: null,
             chatMessages: [],
             message: '',
             username: this.props.username,
+            chatRoom: this.props.location.chatRoom,
             userList: [],
             tabIndex: 0
         }
@@ -43,22 +39,74 @@ class Main extends Component {
 
     }
 
+    joinChatRoom() {
+        let self = this
+        let body = {
+            username: this.state.username,
+            chatRoom: this.state.chatRoom
+        }
+        axios({
+            method: 'POST',
+            url: BASE_URL + '/join_room',
+            data: body
+        }).then(function (response) {
+
+        }).catch(function (error) {
+            console.log(error);
+        }).then(function () {
+        });
+    }
+
+    setUpConnection() {
+        this.joinChatRoom();
+        var self = this;
+        let loc = window.location
+        let wsStart = 'ws://'
+        if (loc.protocol === 'https:') {
+            wsStart = 'wss://'
+        }
+
+        let endpoint = wsStart + loc.host + loc.pathname + '/ws/'
+        this.socket = new WebSocket(endpoint + 'chatroom/' + self.state.chatRoom + '/');
+
+        this.socket.onmessage = function (e) {
+            // console.log("message", e);
+            self.onMessageReceived(e.data)
+        }
+        this.socket.onopen = function (e) {
+            console.log("open", e);
+        }
+
+        this.socket.onclose = function (e) {
+            console.log("close", e);
+        }
+
+        this.socket.onerror = function (e) {
+            console.log("error", e);
+        }
+
+        window.socket = this.socket;
+
+    }
+
     updateUserList() {
         let self = this
-        axios.get(BASE_URL + '/get_user_list')
-            .then(function (response) {
-                // handle success (Try)
-                self.setState({
-                    userList: response.data.userList
-                })
+        let body = {
+            chatRoom: this.state.chatRoom
+        }
+        axios({
+            method: 'POST',
+            url: BASE_URL + '/get_chat_room_user_list',
+            data: body
+        }).then(function (response) {
+            self.setState({
+                userList: response.data.userList
             })
-            .catch(function (error) {
-                // handle error (Catch)
-                console.log(error);
-            })
-            .then(function () {
-                // always executed (Finally)
-            });
+
+        }).catch(function (error) {
+            console.log(error);
+        }).then(function () {
+        });
 
 
     }
@@ -92,41 +140,6 @@ class Main extends Component {
         this.setState({
             chatMessages: array
         })
-    }
-
-    setUpConnection() {
-        var self = this;
-        let loc = window.location
-        let wsStart = 'ws://'
-        if (loc.protocol === 'https:') {
-            wsStart = 'wss://'
-        }
-
-        let endpoint = wsStart + loc.host + loc.pathname + '/ws/'
-        this.socket = new WebSocket(endpoint);
-
-        this.socket.onmessage = function (e) {
-            // console.log("message", e);
-
-            self.onMessageReceived(e.data)
-
-
-        }
-        this.socket.onopen = function (e) {
-            console.log("open", e);
-
-        }
-
-        this.socket.onclose = function (e) {
-            console.log("close", e);
-        }
-
-        this.socket.onerror = function (e) {
-            console.log("error", e);
-        }
-
-        window.socket = this.socket;
-
     }
 
 
@@ -164,18 +177,6 @@ class Main extends Component {
         return listItems
     }
 
-    profileMenuHandleClose() {
-        this.setState({
-            anchorProfileMenu: null
-        });
-
-    }
-
-    profileMenuHandleOpen(event) {
-        this.setState({
-            anchorProfileMenu: event.currentTarget
-        });
-    }
 
     chatUserMenuOpenHandler(event) {
         this.setState({
@@ -190,22 +191,19 @@ class Main extends Component {
         })
     }
 
-    onProfileClicked() {
-        //TODO Redirect to User Profile
+
+    socketSend(data) {
+        this.socket.send(data)
     }
 
-    onLogOutClicked() {
+    leaveRoom() {
         let data = {
             actionType: "logout",
             username: this.state.username
         }
         this.socketSend(JSON.stringify(data))
 
-        this.props.history.push('/')
-    }
-
-    socketSend(data) {
-        this.socket.send(data)
+        this.props.history.push('/home')
     }
 
     render() {
@@ -241,26 +239,6 @@ class Main extends Component {
             return messages;
 
         }
-        const renderProfileMenu = (
-            <Menu
-                anchorEl={this.state.anchorProfileMenu}
-                anchorOrigin={{vertical: 'top', horizontal: 'right'}}
-                transformOrigin={{vertical: 'top', horizontal: 'right'}}
-                open={Boolean(this.state.anchorProfileMenu)}
-                onClose={() => {
-                    this.profileMenuHandleClose()
-                }}
-            >
-                <MenuItem onClick={() => {
-                    this.onProfileClicked();
-                    this.profileMenuHandleClose()
-                }}>Profile</MenuItem>
-                <MenuItem onClick={() => {
-                    this.onLogOutClicked();
-                    this.profileMenuHandleClose()
-                }}>Log Out</MenuItem>
-            </Menu>
-        )
 
         const renderChatUserMenu = (
             <Menu
@@ -287,120 +265,82 @@ class Main extends Component {
                 }}>Send Message</MenuItem>
             </Menu>
         )
+
         return (
             <Fragment>
-                <AppBar position="static">
-                    <Toolbar style={{display: 'flex'}}>
-                        <Typography variant="h6" color="inherit" style={{flex: 1}}>
-                            Django Channel Example
-                        </Typography>
-                        <IconButton
-                            aria-owns={'material-appbar'}
-                            aria-haspopup="true"
-                            onClick={(event) => {
-                                this.profileMenuHandleOpen(event)
+                <Navigation/>
 
-                            }}
-                            color="inherit"
-                        >
-                            <AccountCircle/>
-                        </IconButton>
-                    </Toolbar>
-                    {renderProfileMenu}
-                    {renderChatUserMenu}
-                </AppBar>
+                <Grid container style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
+                    <Button
+                        onClick={() => {
+                            this.leaveRoom();
+                        }}>Close</Button>
+                    <Grid container>
+                        <Grid style={{display: 'flex', flex: 0.2}}>
+                            <Paper style={Styles.leftPane}>
+                                <List component="ul" style={{flex: 1}}>
+                                    {this.populateLeftPanel()}
 
-                <Grid container style={{flex: 1, display: 'flex'}}>
-                    <Grid style={{display: 'flex', flex: 0.2}}>
-                        <Paper style={Styles.leftPane}>
-                            <List component="ul" style={{flex: 1}}>
-                                {this.populateLeftPanel()}
+                                </List>
+                            </Paper>
+                            {renderChatUserMenu}
+                        </Grid>
 
-                            </List>
-                        </Paper>
-                    </Grid>
+                        <Grid style={{display: 'flex', flex: 0.7}}>
+                            <Paper style={Styles.rightPane}>
+                                <Grid style={{
+                                    display: 'flex',
+                                    flex: 1,
+                                    flexDirection: 'column',
+                                    overflowY: 'auto',
+                                    padding: 10,
+                                    flexDirection: 'column'
+                                }}>
+                                    <PopulateMessages/>
+                                </Grid>
 
-                    <Grid style={{display: 'flex', flex: 0.7}}>
-                        <Paper style={Styles.rightPane}>
-                            <Grid style={{
-                                display: 'flex',
-                                flex: 1,
-                                flexDirection: 'column',
-                                overflowY: 'auto',
-                                padding: 10,
-                                flexDirection: 'column'
-                            }}>
-                                <PopulateMessages/>
-                            </Grid>
-
-                            <Grid style={{display: 'flex'}}>
-                                <TextField
-                                    id="outlined-with-placeholder"
-                                    placeholder="Type your message here"
-                                    margin="normal"
-                                    variant="outlined"
-                                    onChange={event => {
-                                        this.setState({
-                                            message: event.target.value
-                                        })
-                                    }
-                                    }
-                                    value={this.state.message}
-                                    onKeyPress={(ev) => {
-                                        if (ev.key === 'Enter') {
-                                            this.sendMessage();
-                                            ev.preventDefault();
+                                <Grid style={{display: 'flex'}}>
+                                    <TextField
+                                        id="outlined-with-placeholder"
+                                        placeholder="Type your message here"
+                                        margin="normal"
+                                        variant="outlined"
+                                        onChange={event => {
+                                            this.setState({
+                                                message: event.target.value
+                                            })
                                         }
-                                    }}
-                                    style={{flex: 1}}
+                                        }
+                                        value={this.state.message}
+                                        onKeyPress={(ev) => {
+                                            if (ev.key === 'Enter') {
+                                                this.sendMessage();
+                                                ev.preventDefault();
+                                            }
+                                        }}
+                                        style={{flex: 1}}
 
-                                />
-                                <div style={{display: 'flex', alignItems: 'center'}}>
+                                    />
+                                    <div style={{display: 'flex', alignItems: 'center'}}>
 
-                                    <Button variant="contained"
-                                            size="large"
-                                            color="primary"
-                                            onClick={() => {
-                                                this.sendMessage()
-                                            }}
+                                        <Button variant="contained"
+                                                size="large"
+                                                color="primary"
+                                                onClick={() => {
+                                                    this.sendMessage()
+                                                }}
 
-                                    >
-                                        Send
-                                    </Button>
-                                </div>
+                                        >
+                                            Send
+                                        </Button>
+                                    </div>
 
-                            </Grid>
-                        </Paper>
+                                </Grid>
+                            </Paper>
+                        </Grid>
                     </Grid>
                 </Grid>
-                <Tabs
-                    value={this.state.tabIndex}
-
-                >
-                    <Tab
-                        disableRipple
-                        label="Tab 1"
-                        onClick={() => {
-                            this.setState({tabIndex: 0})
-                        }}
-
-                    />
-                    <Tab
-                        disableRipple
-                        label="Tab 2"
-                        onClick={() => {
-                            this.setState({tabIndex: 1})
-                        }}
-                    />
-                    <Tab
-                        disableRipple
-                        label="Tab 3"
-                        onClick={() => {
-                            this.setState({tabIndex: 2})
-                        }}
-                    />
-                </Tabs>
-
+                <ChatNavigation/>
             </Fragment>
         )
     }
@@ -410,6 +350,7 @@ class Main extends Component {
             actionType: "message",
             sender: this.state.username,
             message: this.state.message,
+            group: this.state.chatRoom,
 
         }
         this.socket.send(JSON.stringify(clientRequest))
@@ -445,7 +386,8 @@ const
 
 const mapStateToProps = state => {
     return {
-        username: state.login.username
+        username: state.login.username,
+        password: state.login.password
     }
 };
 const mapDispatchToProps = dispatch => {

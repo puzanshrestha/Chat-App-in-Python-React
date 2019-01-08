@@ -5,26 +5,29 @@ from chat.models import User
 
 class EchoConsumer(AsyncConsumer):
     async def websocket_connect(self,event):
-        await self.send({
-            "type":"websocket.accept"
-            })
 
-        await self.channel_layer.group_add("group",self.channel_name)
+        room_name=self.scope['url_route']['kwargs']['room_name']
+        print(room_name)
+        await self.send({
+                "type":"websocket.accept"
+                })
+
+        await self.channel_layer.group_add(room_name,self.channel_name)
         newevent ={
             "type":"chat_message",
-            "text":json.dumps({"actionType":'updateUserList'})
+            "text":json.dumps({"actionType":'updateUserList',"chatRoom":room_name})
             }
-        await self.channel_layer.group_send("group",newevent)
+        await self.channel_layer.group_send(room_name,newevent)
 
     async def websocket_receive(self,event):
         clientRequest = json.loads(event["text"])
 
         clientResponse=dict()
 
-
         if(clientRequest['actionType']=='message'):
             clientResponse['message']=clientRequest['message']
             clientResponse['actionType']='message'
+            clientResponse['group']=clientRequest['group']
             clientResponse['sender']=clientRequest['sender']
             clientResponseJson=json.dumps(clientResponse)
 
@@ -32,13 +35,10 @@ class EchoConsumer(AsyncConsumer):
             #Delete User from Associated Chatroom
             clientResponse['username']=clientRequest['username']
             User.objects.filter(username=clientResponse['username']).delete()
-            clientResponseJson=json.dumps({"actionType":'updateUserList'})
+            clientResponseJson=json.dumps({"actionType":'updateUserList',"group":clientResponse['group']})
 
         else :
             pass
-
-
-
 
         newevent ={
                     "type":"chat_message",
@@ -47,7 +47,7 @@ class EchoConsumer(AsyncConsumer):
 
             #await self.send(newevent)
 
-        await self.channel_layer.group_send("group",newevent)
+        await self.channel_layer.group_send(clientRequest['group'],newevent)
 
     async def chat_message(self,event):
         await self.send({

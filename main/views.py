@@ -44,3 +44,50 @@ def login(requests):
 
     return JsonResponse(response)
 
+
+
+@csrf_exempt
+def joinRoom(requests):
+    try:
+        body_unicode = requests.body.decode('utf-8')
+        body = json.loads(body_unicode)
+
+        response=dict()
+        user = User.objects.get_or_create(username=body['username'],chatRoom=body['chatRoom'])
+        response['code']="joined_chatroom"
+        response['message']='Successfully joined Chatroom'
+
+    except:
+        response['code']="chatroom_joining_failed"
+        response['message']='Login failed, Internal server Error'
+
+
+    return JsonResponse(response)
+
+@csrf_exempt
+def leaveRoom(requests):
+    try:
+        body_unicode = requests.body.decode('utf-8')
+        body = json.loads(body_unicode)
+
+        response=dict()
+        User.objects.filter(username=body['username'],chatRoom=body['chatRoom']).delete()
+        response['code']="left_chatroom"
+        response['message']='Successfully left the Chatroom'
+
+    except:
+        response['code']="chatroom_leaving_failed"
+        response['message']='Login failed, Internal server Error'
+
+
+    return JsonResponse(response)
+
+@csrf_exempt
+def getChatRoomUserList(requests):
+
+    body_unicode = requests.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    userList=list(User.objects.filter(chatRoom=body['chatRoom']).values())
+
+    return JsonResponse({'isValid':'test','userList':userList})
+

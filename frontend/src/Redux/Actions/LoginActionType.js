@@ -1,10 +1,11 @@
 export const LOGIN = "LOGIN";
 export const LOGOUT = "LOGOUT";
 
-export const loginAction = (username) => {
+export const loginAction = (username,password) => {
     return {
         type: LOGIN,
-        username: username
+        username: username,
+        password:password
     };
 };
 

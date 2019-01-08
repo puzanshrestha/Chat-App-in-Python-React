@@ -5,7 +5,10 @@ from main.views import (
     m,
     getUserList,
     logOut,
-    login
+    login,
+    joinRoom,
+    leaveRoom,
+    getChatRoomUserList
 
 )
 
@@ -14,4 +17,8 @@ urlpatterns=[
         url(r'^get_user_list',getUserList),
         url(r'^logout',logOut),
         url(r'^login',login),
+        url(r'^join_room',joinRoom),
+        url(r'^leave_room',leaveRoom),
+        url(r'^get_chat_room_user_list',getChatRoomUserList),
+
 ]

@@ -3,8 +3,7 @@ import {
 } from "../Actions/LoginActionType";
 
 const initialState = {
-    username: '',
-    password: ''
+    socketInstance:{}
 };
 
 export default function reducer(state = initialState, action) {
