@@ -134,12 +134,15 @@ class Main extends Component {
     }
 
     populateMessage(data) {
+        var self = this;
         let array = this.state.chatMessages;
         let response = JSON.parse(data)
         array.push({'sender': response.sender, 'message': response.message});
         this.setState({
             chatMessages: array
         })
+        self.messageDiv.scrollIntoView({behavior: "smooth"});
+
     }
 
 
@@ -297,6 +300,11 @@ class Main extends Component {
                                     flexDirection: 'column'
                                 }}>
                                     <PopulateMessages/>
+                                    <div
+                                        ref={(el) => {
+                                            this.messageDiv = el;
+                                        }}>
+                                    </div>
                                 </Grid>
 
                                 <Grid style={{display: 'flex'}}>
@@ -378,7 +386,8 @@ const
             height: 500,
             display: 'flex',
             flex: 1,
-            flexDirection: 'column'
+            flexDirection: 'column',
+
 
         },
 
