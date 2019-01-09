@@ -18,6 +18,8 @@ import {BASE_URL} from "./Redux/Constants";
 import Navigation from "./Navigation"
 import MoreVert from '@material-ui/icons/MoreVert';
 import ChatNavigation from './ChatNavigation'
+import {login} from "./Redux/Actions/LoginAction";
+import {setSocketInstance} from "./Redux/Actions/SocketAction"
 
 class Main extends Component {
 
@@ -86,6 +88,7 @@ class Main extends Component {
         }
 
         window.socket = this.socket;
+        this.props.setSocketInstance(this.socket);
 
     }
 
@@ -273,12 +276,13 @@ class Main extends Component {
         return (
             <Fragment>
                 <Navigation/>
-
                 <Grid container style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
+                    <Button color="secondary" variant="contained">{this.state.chatRoom}</Button>
                     <Button
                         onClick={() => {
                             this.leaveRoom();
                         }}>Close</Button>
+
                     <Grid container>
                         <Grid style={{display: 'flex', flex: 0.2}}>
                             <Paper style={Styles.leftPane}>
@@ -388,7 +392,6 @@ const
             flexDirection: 'column',
 
 
-
         },
 
     };
@@ -400,7 +403,10 @@ const mapStateToProps = state => {
     }
 };
 const mapDispatchToProps = dispatch => {
-    return {};
+    return {
+        setSocketInstance: (socketInstance) => dispatch(setSocketInstance(socketInstance)),
+
+    };
 };
 export default connect(
     mapStateToProps,

@@ -3,6 +3,7 @@ import {Grid, Paper, TextField, Typography, Button} from "@material-ui/core"
 import {Link} from "react-router-dom";
 import {connect} from "react-redux";
 import {login} from "./Redux/Actions/LoginAction";
+import {withRouter} from "react-router-dom"
 
 class Login extends Component {
     constructor(props) {
@@ -99,10 +100,10 @@ const mapDispatchToProps = dispatch => {
 
     };
 };
-export default connect(
+export default withRouter(connect(
     mapStateToProps,
     mapDispatchToProps
-)(Login);
+)(Login));
 
 
 

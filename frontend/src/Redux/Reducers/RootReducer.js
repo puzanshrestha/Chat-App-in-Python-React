@@ -1,8 +1,10 @@
 import {combineReducers} from "redux";
 import loginReducer from "./LoginReducer";
+import socketReducer from "./SocketReducer";
 
 const appReducer = combineReducers({
     login: loginReducer,
+    socket: socketReducer
 
 });
 

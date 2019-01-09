@@ -33,9 +33,9 @@ class EchoConsumer(AsyncConsumer):
 
         elif(clientRequest['actionType']=='logout'):
             #Delete User from Associated Chatroom
-            clientResponse['username']=clientRequest['username']
-            User.objects.filter(username=clientResponse['username']).delete()
-            clientResponseJson=json.dumps({"actionType":'updateUserList',"chatRoom":clientResponse['chatRoom']})
+
+            User.objects.filter(username=clientRequest['username']).delete()
+            clientResponseJson=json.dumps({"actionType":'updateUserList',"chatRoom":'*'})
 
 
         elif(clientRequest['actionType']=='leaveRoom'):

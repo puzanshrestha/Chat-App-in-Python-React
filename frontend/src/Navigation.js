@@ -1,16 +1,16 @@
 import React, {Component} from "react";
-
+import {connect} from "react-redux"
 import {MenuItem, Menu, AppBar, Toolbar, Typography, IconButton} from '@material-ui/core';
 import AccountCircle from '@material-ui/icons/AccountCircle';
+import {withRouter} from "react-router-dom"
 
-export default class Navigation extends Component {
+class Navigation extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
             anchorProfileMenu: null,
             anchorChatUserMenu: null,
-
 
         }
     }
@@ -35,9 +35,10 @@ export default class Navigation extends Component {
     onLogOutClicked() {
         let data = {
             actionType: "logout",
-            username: this.state.username
+            username: this.props.username
         }
-        this.socketSend(JSON.stringify(data))
+        console.log(data)
+        this.props.socket.send(JSON.stringify(data))
 
         this.props.history.push('/')
     }
@@ -71,12 +72,13 @@ export default class Navigation extends Component {
                 <Typography variant="h6" color="inherit" style={{flex: 1}}>
                     Django Channel Example
                 </Typography>
+
+                <Typography color="inherit">{this.props.username}</Typography>
                 <IconButton
                     aria-owns={'material-appbar'}
                     aria-haspopup="true"
                     onClick={(event) => {
                         this.profileMenuHandleOpen(event)
-
                     }}
                     color="inherit"
                 >
@@ -88,3 +90,15 @@ export default class Navigation extends Component {
         </AppBar>
     }
 }
+
+const mapStateToProps = (state) => {
+    return {
+        username: state.login.username,
+        socket: state.socket.socketInstance
+    }
+}
+const mapDispatchToProps = (dispatch) => {
+
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Navigation))

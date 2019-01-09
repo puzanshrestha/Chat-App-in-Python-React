@@ -1,23 +1,16 @@
 import {
-    LOGIN, LOGOUT
-} from "../Actions/LoginActionType";
+    SET_SOCKET_INSTANCE
+} from "../Actions/SocketActionType";
 
 const initialState = {
-    socketInstance:{}
+    socketInstance: {}
 };
 
 export default function reducer(state = initialState, action) {
     switch (action.type) {
-        case LOGIN:
+        case SET_SOCKET_INSTANCE:
             return Object.assign({}, state, {
-                username: action.username,
-                password: action.password
-            });
-            break;
-
-        case LOGOUT:
-            return Object.assign({}, state, {
-                username: ''
+                socketInstance: action.socketInstance
             });
             break;
 
