@@ -293,12 +293,10 @@ class Main extends Component {
                         <Grid style={{display: 'flex', flex: 0.7}}>
                             <Paper style={Styles.rightPane}>
                                 <Grid style={{
-                                    display: 'flex',
-                                    flex: 1,
-                                    flexDirection: 'column',
                                     overflowY: 'auto',
                                     padding: 10,
-                                    flexDirection: 'column'
+                                    flexDirection: 'column',
+                                    height: '100%'
                                 }}>
                                     <PopulateMessages/>
                                     <div
@@ -388,6 +386,7 @@ const
             display: 'flex',
             flex: 1,
             flexDirection: 'column',
+
 
 
         },
