@@ -27,7 +27,7 @@ class EchoConsumer(AsyncConsumer):
         if(clientRequest['actionType']=='message'):
             clientResponse['message']=clientRequest['message']
             clientResponse['actionType']='message'
-            clientResponse['group']=clientRequest['group']
+            clientResponse['chatRoom']=clientRequest['chatRoom']
             clientResponse['sender']=clientRequest['sender']
             clientResponseJson=json.dumps(clientResponse)
 
@@ -35,7 +35,14 @@ class EchoConsumer(AsyncConsumer):
             #Delete User from Associated Chatroom
             clientResponse['username']=clientRequest['username']
             User.objects.filter(username=clientResponse['username']).delete()
-            clientResponseJson=json.dumps({"actionType":'updateUserList',"group":clientResponse['group']})
+            clientResponseJson=json.dumps({"actionType":'updateUserList',"chatRoom":clientResponse['chatRoom']})
+
+
+        elif(clientRequest['actionType']=='leaveRoom'):
+            #Update UserList
+            User.objects.filter(username=clientRequest['username'],chatRoom=clientRequest['chatRoom']).delete()
+            clientResponseJson=json.dumps({"actionType":'updateUserList',"chatRoom":clientRequest['chatRoom']})
+            print(clientResponseJson)
 
         else :
             pass
@@ -47,7 +54,7 @@ class EchoConsumer(AsyncConsumer):
 
             #await self.send(newevent)
 
-        await self.channel_layer.group_send(clientRequest['group'],newevent)
+        await self.channel_layer.group_send(clientRequest['chatRoom'],newevent)
 
     async def chat_message(self,event):
         await self.send({
@@ -58,6 +65,10 @@ class EchoConsumer(AsyncConsumer):
 
 
     async def websocket_disconnect(self,event):
-         print("disconnected",event)
+         newevent ={
+                     "type":"chat_message",
+                     "text":json.dumps({"actionType":'updateUserList',"chatRoom":room_name})
+                     }
+         await self.channel_layer.group_send(room_name,newevent)
 
 

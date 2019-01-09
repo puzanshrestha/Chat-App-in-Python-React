@@ -201,8 +201,9 @@ class Main extends Component {
 
     leaveRoom() {
         let data = {
-            actionType: "logout",
-            username: this.state.username
+            actionType: "leaveRoom",
+            username: this.state.username,
+            chatRoom: this.state.chatRoom
         }
         this.socketSend(JSON.stringify(data))
 
@@ -358,7 +359,7 @@ class Main extends Component {
             actionType: "message",
             sender: this.state.username,
             message: this.state.message,
-            group: this.state.chatRoom,
+            chatRoom: this.state.chatRoom,
 
         }
         this.socket.send(JSON.stringify(clientRequest))
