@@ -33,9 +33,19 @@ class EchoConsumer(AsyncConsumer):
 
         elif(clientRequest['actionType']=='logout'):
             #Delete User from Associated Chatroom
-
+            chatRoomList=list((User.objects.filter(username=clientRequest['username'])).values_list('chatRoom',flat=True))
+            print(chatRoomList)
             User.objects.filter(username=clientRequest['username']).delete()
-            clientResponseJson=json.dumps({"actionType":'updateUserList',"chatRoom":'*'})
+
+            for chatRoom in chatRoomList:
+                clientResponseJson=json.dumps({"actionType":'updateUserList',"chatRoom":chatRoom})
+                newevent ={
+                                    "type":"chat_message",
+                                    "text":clientResponseJson
+                                    }
+
+                if(chatRoom!=''):
+                    await self.channel_layer.group_send(chatRoom,newevent)
 
 
         elif(clientRequest['actionType']=='leaveRoom'):
@@ -65,10 +75,7 @@ class EchoConsumer(AsyncConsumer):
 
 
     async def websocket_disconnect(self,event):
-         newevent ={
-                     "type":"chat_message",
-                     "text":json.dumps({"actionType":'updateUserList',"chatRoom":room_name})
-                     }
-         await self.channel_layer.group_send(room_name,newevent)
+        print("test")
+
 
 

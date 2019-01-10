@@ -33,12 +33,17 @@ class Navigation extends Component {
     }
 
     onLogOutClicked() {
-        let data = {
-            actionType: "logout",
-            username: this.props.username
+        try {
+            let data = {
+                actionType: "logout",
+                username: this.props.username,
+            }
+
+            this.props.socket.send(JSON.stringify(data))
         }
-        console.log(data)
-        this.props.socket.send(JSON.stringify(data))
+        catch (exception) {
+
+        }
 
         this.props.history.push('/')
     }
